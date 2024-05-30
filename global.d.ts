@@ -34,7 +34,7 @@ declare global {
     interface LiEntity {
         $type: LiTypeStr;
         entityUrn: LiUrn;
-        objectUrn?: LiUrn;
+        member_id?: LiUrn;
         [key: string]: any;
         paging?: LiPaging;
     }

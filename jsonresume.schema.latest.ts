@@ -47,7 +47,7 @@ export interface Basics {
     name?: string;
     firstName?: string;
     lastName?: string;
-    objectUrn?: string;
+    member_id?: string;
     /**
      * Phone numbers are stored as strings so use any format you like, e.g. 712-117-2923
      */
