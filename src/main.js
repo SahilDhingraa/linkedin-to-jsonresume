@@ -1042,7 +1042,7 @@ window.LinkedinToResumeJson = (() => {
                         name: `${data.firstName} ${data.LastName}`,
                         firstName: data.firstName,
                         lastName: data.LastName,
-                        objectUrn: JSON.stringify({}),
+                        objectUrn: '',
                         // Note - LI labels this as "occupation", but it is basically the callout that shows up in search results and is in the header of the profile
                         label: data.occupation
                     };
@@ -1486,7 +1486,106 @@ window.LinkedinToResumeJson = (() => {
 
     /** @param {SchemaVersion} version */
     LinkedinToResumeJson.prototype.parseAndDownload = async function parseAndDownload(version = 'stable') {
-        const rawJson = await this.parseAndGetRawJson(version);
+        let rawJson = await this.parseAndGetRawJson(version);
+        rawJson.current_company = rawJson.work[0].name;
+        rawJson.current_company_position = rawJson.work[0].position;
+        rawJson.current_company_position = rawJson.work[0].position;
+
+        let work = rawJson.work.reduce((acc, item, index) => {
+            let newItem = {};
+            for (let key in item) {
+                switch (key) {
+                    case 'name':
+                        newItem[`organization_${index + 1}`] = item[key];
+                        break;
+                    case 'position':
+                        newItem[`organization_title_${index + 1}`] = item[key];
+                        break;
+                    case 'startDate':
+                        newItem[`organization_start_${index + 1}`] = item[key];
+                        break;
+                    case 'endDate':
+                        newItem[`organization_end_${index + 1}`] = item[key];
+                        break;
+                    case 'summary':
+                        newItem[`organization_description_${index + 1}`] = item[key];
+                        break;
+                    case 'url':
+                        newItem[`organization_url_${index + 1}`] = item[key];
+                        break;
+                    case 'location':
+                        newItem[`organization_location_${index + 1}`] = item[key];
+                        break;
+                    case 'highlights':
+                        newItem[`organization_highlights_${index + 1}`] = item[key];
+                        break;
+                }
+            }
+            return { ...acc, ...newItem };
+        }, {});
+
+        let education = rawJson.education.reduce((acc, item, index) => {
+            let newItem = {};
+            for (let key in item) {
+                switch (key) {
+                    case 'institution':
+                        newItem[`education_${index + 1}`] = item[key];
+                        break;
+                    case 'area':
+                        newItem[`education_degree_${index + 1}`] = item[key];
+                        break;
+                    case 'studyType':
+                        newItem[`education_fos_${index + 1}`] = item[key];
+                        break;
+                    case 'startDate':
+                        newItem[`education_start_${index + 1}`] = item[key];
+                        break;
+                    case 'endDate':
+                        newItem[`education_end_${index + 1}`] = item[key];
+                        break;
+                    case 'score':
+                        newItem[`education_score_${index + 1}`] = item[key];
+                        break;
+                    case 'courses':
+                        newItem[`education_courses_${index + 1}`] = item[key];
+                        break;
+                }
+            }
+            return { ...acc, ...newItem };
+        }, {});
+
+        let languages = rawJson.languages.reduce((acc, item, index) => {
+            let newItem = {};
+            for (let key in item) {
+                switch (key) {
+                    case 'language':
+                        newItem[`language_${index + 1}`] = item[key];
+                        break;
+                    case 'fluency':
+                        newItem[`language_proficiency_${index + 1}`] = item[key];
+                        break;
+                }
+            }
+            return { ...acc, ...newItem };
+        }, {});
+
+        let profiles = rawJson.basics.profiles.reduce((acc, item, index) => {
+            let newItem = {};
+            newItem[`${item.network}_username`] = item.username;
+            newItem[`${item.network}_url`] = item.url;
+            return { ...acc, ...newItem };
+        }, {});
+
+        let skills = rawJson.skills.reduce((acc, item, index) => {
+            acc += `${item.name}: ${item.level ? item.level : 0}${index < rawJson.skills.length - 1 ? ', ' : ''}`;
+            return acc;
+        }, '');
+        delete rawJson.basics.profiles;
+        rawJson.basics = { ...rawJson.basics, ...profiles };
+        rawJson.work = work;
+        rawJson.education = education;
+        rawJson.languages = languages;
+        rawJson.skills = skills;
         const fileName = `${_outputJsonLegacy.basics.name.replace(/\s/g, '_')}.resume.json`;
         const fileContents = JSON.stringify(rawJson, null, 2);
         this.debugConsole.log(fileContents);
@@ -1495,7 +1594,107 @@ window.LinkedinToResumeJson = (() => {
 
     /** @param {SchemaVersion} version */
     LinkedinToResumeJson.prototype.parseAndShowOutput = async function parseAndShowOutput(version = 'stable') {
-        const rawJson = await this.parseAndGetRawJson(version);
+        let rawJson = await this.parseAndGetRawJson(version);
+        rawJson.current_company = rawJson.work[0].name;
+        rawJson.current_company_position = rawJson.work[0].position;
+        rawJson.current_company_position = rawJson.work[0].position;
+
+        let work = rawJson.work.reduce((acc, item, index) => {
+            let newItem = {};
+            for (let key in item) {
+                switch (key) {
+                    case 'name':
+                        newItem[`organization_${index + 1}`] = item[key];
+                        break;
+                    case 'position':
+                        newItem[`organization_title_${index + 1}`] = item[key];
+                        break;
+                    case 'startDate':
+                        newItem[`organization_start_${index + 1}`] = item[key];
+                        break;
+                    case 'endDate':
+                        newItem[`organization_end_${index + 1}`] = item[key];
+                        break;
+                    case 'summary':
+                        newItem[`organization_description_${index + 1}`] = item[key];
+                        break;
+                    case 'url':
+                        newItem[`organization_url_${index + 1}`] = item[key];
+                        break;
+                    case 'location':
+                        newItem[`organization_location_${index + 1}`] = item[key];
+                        break;
+                    case 'highlights':
+                        newItem[`organization_highlights_${index + 1}`] = item[key];
+                        break;
+                }
+            }
+            return { ...acc, ...newItem };
+        }, {});
+
+        let education = rawJson.education.reduce((acc, item, index) => {
+            let newItem = {};
+            for (let key in item) {
+                switch (key) {
+                    case 'institution':
+                        newItem[`education_${index + 1}`] = item[key];
+                        break;
+                    case 'area':
+                        newItem[`education_degree_${index + 1}`] = item[key];
+                        break;
+                    case 'studyType':
+                        newItem[`education_fos_${index + 1}`] = item[key];
+                        break;
+                    case 'startDate':
+                        newItem[`education_start_${index + 1}`] = item[key];
+                        break;
+                    case 'endDate':
+                        newItem[`education_end_${index + 1}`] = item[key];
+                        break;
+                    case 'score':
+                        newItem[`education_score_${index + 1}`] = item[key];
+                        break;
+                    case 'courses':
+                        newItem[`education_courses_${index + 1}`] = item[key];
+                        break;
+                }
+            }
+            return { ...acc, ...newItem };
+        }, {});
+
+        let languages = rawJson.languages.reduce((acc, item, index) => {
+            let newItem = {};
+            for (let key in item) {
+                switch (key) {
+                    case 'language':
+                        newItem[`language_${index + 1}`] = item[key];
+                        break;
+                    case 'fluency':
+                        newItem[`language_proficiency_${index + 1}`] = item[key];
+                        break;
+                }
+            }
+            return { ...acc, ...newItem };
+        }, {});
+
+        let profiles = rawJson.basics.profiles.reduce((acc, item, index) => {
+            let newItem = {};
+            newItem[`${item.network}_username`] = item.username;
+            newItem[`${item.network}_url`] = item.url;
+            return { ...acc, ...newItem };
+        }, {});
+
+        let skills = rawJson.skills.reduce((acc, item, index) => {
+            acc += `${item.name}: ${item.level ? item.level : 0}${index < rawJson.skills.length - 1 ? ', ' : ''}`;
+            return acc;
+        }, '');
+        delete rawJson.basics.profiles;
+        rawJson.basics = { ...rawJson.basics, ...profiles };
+        rawJson.work = work;
+        rawJson.education = education;
+        rawJson.languages = languages;
+        rawJson.skills = skills;
+
         const parsedExport = {
             raw: rawJson,
             stringified: JSON.stringify(rawJson, null, 2)
