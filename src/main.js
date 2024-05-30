@@ -483,9 +483,11 @@ window.LinkedinToResumeJson = (() => {
                         name: `${profile.firstName} ${profile.lastName}`,
                         firstName: noNullOrUndef(profile.firstName),
                         lastName: noNullOrUndef(profile.lastName),
-                        member_id: '',
+                        member_id: "",
                         summary: noNullOrUndef(profile.summary),
                         label: noNullOrUndef(profile.headline),
+                        MailingCity: noNullOrUndef(profile.geoLocationName),
+                        MailingCountry: noNullOrUndef(profile.geoCountryName),
                         location: {
                             countryCode: localeObject.country
                         }
@@ -1043,6 +1045,8 @@ window.LinkedinToResumeJson = (() => {
                         firstName: data.firstName,
                         lastName: data.LastName,
                         member_id: '',
+                        MailingCity: data.geoLocationName,
+                        MailingCountry: data.geoCountryName,
                         // Note - LI labels this as "occupation", but it is basically the callout that shows up in search results and is in the header of the profile
                         label: data.occupation
                     };
@@ -1223,7 +1227,7 @@ window.LinkedinToResumeJson = (() => {
         try {
             // This is a really annoying lookup - I can't find a separate API endpoint, so I have to use the full-FULL (dash) profile endpoint...
             const fullDashProfileObj = await this.voyagerFetch(_voyagerEndpoints.dash.fullProfile.path);
-            _outputJsonLegacy.basics.member_id = JSON.stringify(fullDashProfileObj);
+            _outputJsonLegacy.basics.member_id = "";
             const db = buildDbFromLiSchema(fullDashProfileObj);
             // Response is missing ToC, so just look up by namespace / schema
             const eduEntries = db.getElementsByType('com.linkedin.voyager.dash.identity.profile.Education');
@@ -1392,7 +1396,7 @@ window.LinkedinToResumeJson = (() => {
         if (!localeMatchesUser || this.preferDash === true) {
             endpointType = 'dashFullProfileWithEntities';
             profileResponse = await this.voyagerFetch(_voyagerEndpoints.dash.fullProfile.path);
-            _outputJsonLegacy.basics.member_id = JSON.stringify(profileResponse);
+            _outputJsonLegacy.basics.member_id = "";
         } else {
             // use normal profileView
             profileResponse = await this.voyagerFetch(_voyagerEndpoints.fullProfileView);
@@ -1610,7 +1614,6 @@ window.LinkedinToResumeJson = (() => {
                 newItem[`${item.network}_url`] = item.url;
                 return { ...acc, ...newItem };
             }, {});
-
 
             rawJson.basics = { ...rawJson.basics, ...profiles };
             rawJson = {...rawJson, ...rawJson.basics, ...references, ...publications, ...volunteer, ...certificates, ...awards, ...work, ...education, ...languages}
