@@ -210,6 +210,14 @@ export interface ResumeSchemaStable {
     certificates: Certificate[];
     education?: Education[];
     interests?: Interest[];
+    phone_1?: '';
+    phone_type_1?: '';
+    phone_2?: '';
+    phone_type_2?: '';
+    messenger_1?: '';
+    messenger_provider_1?: '';
+    messenger_2?: '';
+    messenger_provider_2?: '';
     /**
      * List any other languages you speak
      */

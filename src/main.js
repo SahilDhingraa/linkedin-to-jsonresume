@@ -1558,6 +1558,46 @@ window.LinkedinToResumeJson = (() => {
                 return { ...acc, ...newItem };
             }, {});
 
+            let awards = rawJson.awards.reduce((acc, item, index) => {
+                let newItem = {};
+                for (let key in item) {
+                    newItem[`award_${index + 1}_${key}`] = item[key];
+                }
+                return { ...acc, ...newItem };
+            }, {});
+
+            let volunteer = rawJson.volunteer.reduce((acc, item, index) => {
+                let newItem = {};
+                for (let key in item) {
+                    newItem[`volunteer_${index + 1}_${key}`] = item[key];
+                }
+                return { ...acc, ...newItem };
+            }, {});
+
+            let certificates = rawJson.certificates.reduce((acc, item, index) => {
+                let newItem = {};
+                for (let key in item) {
+                    newItem[`certificate_${index + 1}_${key}`] = item[key];
+                }
+                return { ...acc, ...newItem };
+            }, {});
+
+            let publications = rawJson.publications.reduce((acc, item, index) => {
+                let newItem = {};
+                for (let key in item) {
+                    newItem[`publication_${index + 1}_${key}`] = item[key];
+                }
+                return { ...acc, ...newItem };
+            }, {});
+
+            let references = rawJson.references.reduce((acc, item, index) => {
+                let newItem = {};
+                for (let key in item) {
+                    newItem[`reference_${index + 1}_${key}`] = item[key];
+                }
+                return { ...acc, ...newItem };
+            }, {});
+
             let profiles = rawJson.basics.profiles.reduce((acc, item, index) => {
                 let newItem = {};
                 newItem[`${item.network}_username`] = item.username;
@@ -1569,12 +1609,19 @@ window.LinkedinToResumeJson = (() => {
                 acc += `${item.name}: ${item.level ? item.level : 0}${index < rawJson.skills.length - 1 ? ', ' : ''}`;
                 return acc;
             }, '');
-            delete rawJson.basics.profiles;
             rawJson.basics = { ...rawJson.basics, ...profiles };
-            rawJson.work = work;
-            rawJson.education = education;
-            rawJson.languages = languages;
             rawJson.skills = skills;
+            rawJson = {...rawJson, ...rawJson.basics, ...references, ...publications, ...volunteer, ...certificates, ...awards, ...work, ...education, ...languages}
+            delete rawJson.basics;
+            delete rawJson.profiles;
+            delete rawJson.references;
+            delete rawJson.publications;
+            delete rawJson.volunteer;
+            delete rawJson.certificates;
+            delete rawJson.awards;
+            delete rawJson.work;
+            delete rawJson.education;
+            delete rawJson.languages;
         }
         // If beta, combine with stable
         if (version === 'beta') {

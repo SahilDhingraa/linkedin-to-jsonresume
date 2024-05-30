@@ -63,6 +63,14 @@ export const resumeJsonTemplateStable = {
     skills: [],
     languages: [],
     interests: [],
+    phone_1: '',
+    phone_type_1: '',
+    phone_2: '',
+    phone_type_2: '',
+    messenger_1: '',
+    messenger_provider_1: '',
+    messenger_2: '',
+    messenger_provider_2: '',
     references: [],
     projects: []
     // meta: {
