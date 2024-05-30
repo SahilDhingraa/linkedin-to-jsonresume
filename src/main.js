@@ -1478,8 +1478,14 @@ window.LinkedinToResumeJson = (() => {
         if (!rawJson.current_company) {
             rawJson.current_company = rawJson.work[0].name;
             rawJson.current_company_position = rawJson.work[0].position;
-            rawJson.current_company_position = rawJson.work[0].position;
 
+            let skills = rawJson.skills.reduce((acc, item, index) => {
+                acc += `${item.name}: ${item.level ? item.level : 0}${index < rawJson.skills.length - 1 ? ', ' : ''}`;
+                return acc;
+            }, '');
+            rawJson.skills = skills;
+        }
+        if(rawJson.basics || rawJson.work){
             let work = rawJson.work.reduce((acc, item, index) => {
                 let newItem = {};
                 for (let key in item) {
@@ -1605,12 +1611,8 @@ window.LinkedinToResumeJson = (() => {
                 return { ...acc, ...newItem };
             }, {});
 
-            let skills = rawJson.skills.reduce((acc, item, index) => {
-                acc += `${item.name}: ${item.level ? item.level : 0}${index < rawJson.skills.length - 1 ? ', ' : ''}`;
-                return acc;
-            }, '');
+
             rawJson.basics = { ...rawJson.basics, ...profiles };
-            rawJson.skills = skills;
             rawJson = {...rawJson, ...rawJson.basics, ...references, ...publications, ...volunteer, ...certificates, ...awards, ...work, ...education, ...languages}
             delete rawJson.basics;
             delete rawJson.profiles;
@@ -1622,6 +1624,7 @@ window.LinkedinToResumeJson = (() => {
             delete rawJson.work;
             delete rawJson.education;
             delete rawJson.languages;
+
         }
         // If beta, combine with stable
         if (version === 'beta') {
