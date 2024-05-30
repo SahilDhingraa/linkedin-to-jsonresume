@@ -8,3 +8,6 @@ scratch
 *.pem
 *.crx
 .DS_Store
+profile.json
+bun.lockb
+base.js

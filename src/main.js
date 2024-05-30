@@ -33,6 +33,7 @@ window.LinkedinToResumeJson = (() => {
     // private
     /** @type {ResumeSchemaLegacy} */
     let _outputJsonLegacy = JSON.parse(JSON.stringify(resumeJsonTemplateLegacy));
+    let _basicAboutMe;
     /** @type {ResumeSchemaStable} */
     let _outputJsonStable = JSON.parse(JSON.stringify(resumeJsonTemplateStable));
     /** @type {ResumeSchemaBeyondSpec} */
@@ -481,6 +482,9 @@ window.LinkedinToResumeJson = (() => {
                     /** @type {ResumeSchemaLegacy['basics']} */
                     const formattedProfileObj = {
                         name: `${profile.firstName} ${profile.lastName}`,
+                        firstName: noNullOrUndef(profile.firstName),
+                        lastName: noNullOrUndef(profile.lastName),
+                        objectUrn: JSON.stringify(_basicAboutMe ? _basicAboutMe : {}),
                         summary: noNullOrUndef(profile.summary),
                         label: noNullOrUndef(profile.headline),
                         location: {
@@ -1030,12 +1034,16 @@ window.LinkedinToResumeJson = (() => {
     LinkedinToResumeJson.prototype.parseViaInternalApiBasicAboutMe = async function parseViaInternalApiBasicAboutMe() {
         try {
             const basicAboutMe = await this.voyagerFetch(_voyagerEndpoints.basicAboutMe);
+            _basicAboutMe = await this.voyagerFetch(_voyagerEndpoints.dash.fullProfile.path);
             if (basicAboutMe && typeof basicAboutMe.data === 'object') {
                 if (Array.isArray(basicAboutMe.included) && basicAboutMe.included.length > 0) {
                     const data = basicAboutMe.included[0];
                     /** @type {Partial<ResumeSchemaLegacy['basics']>} */
                     const partialBasics = {
                         name: `${data.firstName} ${data.LastName}`,
+                        firstName: data.firstName,
+                        lastName: data.LastName,
+                        objectUrn: JSON.stringify(_basicAboutMe),
                         // Note - LI labels this as "occupation", but it is basically the callout that shows up in search results and is in the header of the profile
                         label: data.occupation
                     };
@@ -1044,7 +1052,7 @@ window.LinkedinToResumeJson = (() => {
                         ...partialBasics
                     };
                     _outputJsonStable.basics = {
-                        ..._outputJsonStable.basics,
+                        ..._outputJsonStable,
                         ...partialBasics
                     };
                 }
@@ -1216,6 +1224,7 @@ window.LinkedinToResumeJson = (() => {
         try {
             // This is a really annoying lookup - I can't find a separate API endpoint, so I have to use the full-FULL (dash) profile endpoint...
             const fullDashProfileObj = await this.voyagerFetch(_voyagerEndpoints.dash.fullProfile.path);
+            _outputJsonLegacy.basics.objectUrn = JSON.stringify(fullDashProfileObj);
             const db = buildDbFromLiSchema(fullDashProfileObj);
             // Response is missing ToC, so just look up by namespace / schema
             const eduEntries = db.getElementsByType('com.linkedin.voyager.dash.identity.profile.Education');
@@ -1384,6 +1393,7 @@ window.LinkedinToResumeJson = (() => {
         if (!localeMatchesUser || this.preferDash === true) {
             endpointType = 'dashFullProfileWithEntities';
             profileResponse = await this.voyagerFetch(_voyagerEndpoints.dash.fullProfile.path);
+            _outputJsonLegacy.basics.objectUrn = JSON.stringify(profileResponse);
         } else {
             // use normal profileView
             profileResponse = await this.voyagerFetch(_voyagerEndpoints.fullProfileView);

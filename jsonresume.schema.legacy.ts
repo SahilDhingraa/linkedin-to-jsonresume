@@ -74,6 +74,9 @@ export interface Basics {
     label?: string;
     location?: Location;
     name: string;
+    firstName?: string;
+    lastName?: string;
+    objectUrn?: string;
     /**
      * Phone numbers are stored as strings so use any format you like, e.g. 712-117-2923
      */

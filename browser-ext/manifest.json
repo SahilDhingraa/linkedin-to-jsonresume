@@ -1,5 +1,6 @@
 {
     "name": "JSON Resume Exporter",
+    "version": "1.0",
     "description": "Export a profile page to JSON Resume",
     "manifest_version": 2,
     "icons": {

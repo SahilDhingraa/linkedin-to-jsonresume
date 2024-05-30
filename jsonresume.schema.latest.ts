@@ -45,6 +45,9 @@ export interface Basics {
     label?: string;
     location?: Location;
     name?: string;
+    firstName?: string;
+    lastName?: string;
+    objectUrn?: string;
     /**
      * Phone numbers are stored as strings so use any format you like, e.g. 712-117-2923
      */
@@ -198,7 +201,7 @@ export interface ResumeSchemaStable {
     /**
      * link to the version of the schema that can validate the resume
      */
-    $schema?: string;
+    // $schema?: string;
     /**
      * Specify any awards you have received throughout your professional career
      */
@@ -214,7 +217,7 @@ export interface ResumeSchemaStable {
     /**
      * The schema version and any other tooling configuration lives here
      */
-    meta?: Meta;
+    // meta?: Meta;
     /**
      * Specify career projects
      */
