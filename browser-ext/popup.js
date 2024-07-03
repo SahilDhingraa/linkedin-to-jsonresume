@@ -182,13 +182,19 @@ document.getElementById('liToJsonDownloadButton').addEventListener('click', () =
     });
 });
 
+document.getElementById('vcardExportButton').addEventListener('click', () => {
+    chrome.tabs.executeScript({
+        code: `liToJrInstance.preferLocale = '${getSelectedLang()}';liToJrInstance.parseAndDownloadCSV();`
+    });
+});
+
 LANG_SELECT.addEventListener('change', () => {
     setLang(getSelectedLang());
 });
 
-document.getElementById('vcardExportButton').addEventListener('click', () => {
-    exportVCard();
-});
+// document.getElementById('vcardExportButton').addEventListener('click', () => {
+//     exportVCard();
+// });
 
 SPEC_SELECT.addEventListener('change', () => {
     setSpecVersion(/** @type {SchemaVersion} */ (SPEC_SELECT.value));

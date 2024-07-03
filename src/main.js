@@ -7,6 +7,7 @@
 
 // @ts-ignore
 import VCardsJS from '@dan/vcards';
+// import { Parser } from 'json2csv';
 import { resumeJsonTemplateLegacy, resumeJsonTemplateStable, resumeJsonTemplateBetaPartial } from './templates';
 import { liSchemaKeys as _liSchemaKeys, liTypeMappings as _liTypeMappings } from './schema';
 import {
@@ -483,7 +484,7 @@ window.LinkedinToResumeJson = (() => {
                         name: `${profile.firstName} ${profile.lastName}`,
                         firstName: noNullOrUndef(profile.firstName),
                         lastName: noNullOrUndef(profile.lastName),
-                        member_id: "",
+                        member_id: '',
                         summary: noNullOrUndef(profile.summary),
                         label: noNullOrUndef(profile.headline),
                         MailingCity: noNullOrUndef(profile.geoLocationName),
@@ -1227,7 +1228,7 @@ window.LinkedinToResumeJson = (() => {
         try {
             // This is a really annoying lookup - I can't find a separate API endpoint, so I have to use the full-FULL (dash) profile endpoint...
             const fullDashProfileObj = await this.voyagerFetch(_voyagerEndpoints.dash.fullProfile.path);
-            _outputJsonLegacy.basics.member_id = "";
+            _outputJsonLegacy.basics.member_id = '';
             const db = buildDbFromLiSchema(fullDashProfileObj);
             // Response is missing ToC, so just look up by namespace / schema
             const eduEntries = db.getElementsByType('com.linkedin.voyager.dash.identity.profile.Education');
@@ -1396,7 +1397,7 @@ window.LinkedinToResumeJson = (() => {
         if (!localeMatchesUser || this.preferDash === true) {
             endpointType = 'dashFullProfileWithEntities';
             profileResponse = await this.voyagerFetch(_voyagerEndpoints.dash.fullProfile.path);
-            _outputJsonLegacy.basics.member_id = "";
+            _outputJsonLegacy.basics.member_id = '';
         } else {
             // use normal profileView
             profileResponse = await this.voyagerFetch(_voyagerEndpoints.fullProfileView);
@@ -1489,7 +1490,7 @@ window.LinkedinToResumeJson = (() => {
             }, '');
             rawJson.skills = skills;
         }
-        if(rawJson.basics || rawJson.work){
+        if (rawJson.basics || rawJson.work) {
             let work = rawJson.work.reduce((acc, item, index) => {
                 let newItem = {};
                 for (let key in item) {
@@ -1616,7 +1617,7 @@ window.LinkedinToResumeJson = (() => {
             }, {});
 
             rawJson.basics = { ...rawJson.basics, ...profiles };
-            rawJson = {...rawJson, ...rawJson.basics, ...references, ...publications, ...volunteer, ...certificates, ...awards, ...work, ...education, ...languages}
+            rawJson = { ...rawJson, ...rawJson.basics, ...references, ...publications, ...volunteer, ...certificates, ...awards, ...work, ...education, ...languages };
             delete rawJson.basics;
             delete rawJson.profiles;
             delete rawJson.references;
@@ -1627,7 +1628,6 @@ window.LinkedinToResumeJson = (() => {
             delete rawJson.work;
             delete rawJson.education;
             delete rawJson.languages;
-
         }
         // If beta, combine with stable
         if (version === 'beta') {
@@ -1638,6 +1638,48 @@ window.LinkedinToResumeJson = (() => {
         }
         return rawJson;
     };
+    /** @param {SchemaVersion} version */
+    LinkedinToResumeJson.prototype.parseAndDownloadCSV = async function parseAndDownloadCSV(version = 'stable') {
+        const rawJson = await this.parseAndGetRawJson(version);
+
+        // Function to flatten the JSON object
+        function flattenObject(obj, parentKey = '', result = {}) {
+            for (const key in obj) {
+                const propName = parentKey ? `${parentKey}_${key}` : key;
+                if (typeof obj[key] === 'object' && obj[key] !== null && !Array.isArray(obj[key])) {
+                    flattenObject(obj[key], propName, result);
+                } else {
+                    result[propName] = obj[key];
+                }
+            }
+            return result;
+        }
+
+        // Flatten the raw JSON object
+        const flatJson = flattenObject(rawJson);
+
+        // Extract headers and rows for CSV
+        const headers = Object.keys(flatJson);
+        const values = headers.map((header) => JSON.stringify(flatJson[header], replacer));
+
+        const csvRows = [];
+        csvRows.push(headers.join(',')); // Add headers row
+        csvRows.push(values.join(',')); // Add values row
+
+        const csvString = csvRows.join('\n');
+
+        const fileName = `${rawJson.name.replace(/\s/g, '_')}.resume.csv`;
+        this.debugConsole.log(csvString);
+        promptDownload(csvString, fileName, 'text/csv');
+    };
+
+    function replacer(key, value) {
+        // Handle special cases if necessary, e.g., escape quotes
+        if (typeof value === 'string') {
+            return value.replace(/"/g, '""'); // Escape double quotes
+        }
+        return value;
+    }
 
     /** @param {SchemaVersion} version */
     LinkedinToResumeJson.prototype.parseAndDownload = async function parseAndDownload(version = 'stable') {
